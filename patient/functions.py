@@ -1,35 +1,23 @@
-import mysql.connector as sql
+import os
+import sys
+import patient.core_functions as cf
+sys.path.append(os.path.abspath('.'))
 
-# module to connect to the database
-
-def databaseConnect():
-
-    cnx = sql.connect(host="localhost", user="root", password="hetu123456", database="hospital")
-    print(cnx)
-    return cnx
-
-#a multi use module enabling view, add, edit and delete data in sql
 def addeditdelete(mode, table):
 
     columns = {}
-    cnx = databaseConnect()
+    cnx = cf.databaseConnect()
     cursor = cnx.cursor(buffered=True)
-    statement = "select * from {0};".format(table)
-    cursor.execute(statement)
-    content = cursor.description
+    content = cf.get_input_fields("{}".format(table))
 
     if mode == 0:
 
-        statement = "select * from hospital.{}".format(table)
-        cursor.execute(statement)
-        content = cursor.description
+        column = input("What do you want to search? : ")
 
-        rows = cursor.fetchall()
-        print("Number of records: " + str(len(rows)))
-        for i in rows:
-            print(i)
 
     elif mode == 1:
+
+
 
         column_name = []
         column_value = []
@@ -49,24 +37,11 @@ def addeditdelete(mode, table):
                 column_name.append(column_name1[i])
                 column_value.append(columns[content[i][0]])
 
-        column_name1 = str(column_name)
-        column_name2 = column_name1.replace("[", "")
-        column_name3 = column_name2.replace("]", "")
-        column_name4 = column_name3.replace("'", "`")
-        print(column_name4)
-
-        column_value1 = str(column_value)
-        column_value2 = column_value1.replace("[", "")
-        column_value3 = column_value2.replace("]", "")
-        print(column_value3)
-
-        statement2 = "INSERT INTO `hospital`.`{0}` ({1}) VALUES ({2});".format(str(table), column_name4, column_value3)
-        print(statement2)
-        cursor.execute(statement2)
-        cnx.commit()
-        cnx.close()
-
+        cf.add("{}".format(table), column_name, column_value)
     elif mode == 2:
+
+        column_names = []
+        column_values = []
 
         print("Editing :")
 
@@ -80,11 +55,9 @@ def addeditdelete(mode, table):
                 statement1 = "Enter {}".format(variable)
                 columns[variable] = input(statement1 + ": ")
 
-            statement = "UPDATE `hospital`.`{0}` SET `{1}`='{2}' WHERE (`{3}` = '{4}');".format(
-                table, content[i][0], columns[content[i][0]], content[0][0], columns[content[0][0]])
-            print(statement)
-
-            cursor.execute(statement)
+            column_names.append(content[i][0])
+            column_values.append(columns[content[i][0]])
+        cf.edit(table, column_names, column_values)
 
         cnx.commit()
         cnx.close()
@@ -94,10 +67,11 @@ def addeditdelete(mode, table):
         statement1 = "Enter the {0} you want to delete: ".format(content[0][0])
         selected_record = int(input(statement1))
 
-        statement = "DELETE FROM `hospital`.`{0}` WHERE (`{1}` = '{2}');".format(table, content[0][0],
-                                                                                 str(selected_record))
+        column = content[0][0] #first field, is primary by design of db
+        value = selected_record
 
-        cursor.execute(statement)
+
+        cf.delete(table,column,value)
 
         print("The record is deleted!")
 
@@ -171,6 +145,9 @@ def inventory_functions():
 
             elif selection2 == 3:
                 addeditdelete(3, "inventory")
+
+            elif selection2 == 4:
+                pass
 
             elif selection2 == 5:
                 addeditdelete(0, "inventory")
