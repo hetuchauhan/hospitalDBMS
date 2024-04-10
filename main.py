@@ -1,7 +1,10 @@
-import mysql.connector
-import patient.functions as pf
+import os
+import sys
 
-cnx = pf.databaseConnect() #module to connect database
+import patient.functions as pf
+import patient.core_functions as cf
+print(sys.version)
+cnx = cf.databaseConnect() #module to connect database
 cursor = cnx.cursor()
 print("Welcome to Health DBMS.")
 
@@ -21,10 +24,14 @@ for i in range(len(allowedUsers)):
         print("Successfully logged in\n")
         auth = 1
         priviledge = int(allowedUsers[i][2])
+
         break
     else:
         print("User_ID and password do not match.")
         break
+
+print(auth)
+print(priviledge)
 
 if auth == 1:
     if priviledge == 1:
